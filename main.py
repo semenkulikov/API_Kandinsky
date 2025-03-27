@@ -62,6 +62,17 @@ def save_image(base64_data, file_path):
         f.write(image_data)
 
 
+def get_user_input():
+    while True:
+        try:
+            num = int(input("Сколько изображений сгенерировать? (1-100): "))
+            if 1 <= num <= 100:
+                return num
+            print("Число должно быть от 1 до 100!")
+        except ValueError:
+            print("Введите целое число!")
+
+
 def main():
     # Чтение описания из input.txt
     with open("input.txt", "r", encoding="utf-8") as file:
@@ -75,19 +86,22 @@ def main():
     pipeline_id = api.get_pipeline()
     print("Используемая модель (pipeline):", pipeline_id)
 
-    # Отправка запроса на генерацию
-    uuid = api.generate(prompt, pipeline_id)
-    print("UUID запроса:", uuid)
+    num_images = get_user_input()  # Получаем количество через интерактивный ввод
 
-    # Проверка статуса и получение сгенерированного изображения
-    print("Ожидание генерации изображения...")
-    files = api.check_generation(uuid)
+    for i in range(num_images):
+        print(f"\nГенерация изображения {i + 1}/{num_images}")
+        uuid = api.generate(prompt, pipeline_id)
+        print("UUID запроса:", uuid)
 
-    # Сохранение изображения (в данном примере ожидается одно изображение)
-    for idx, file_data in enumerate(files):
-        file_name = os.path.join("photos", f"image_{idx + 1}.png")
-        save_image(file_data, file_name)
-        print(f"Изображение сохранено: {file_name}")
+        # Проверка статуса и получение сгенерированного изображения
+        print("Ожидание генерации изображения...")
+        files = api.check_generation(uuid)
+
+        timestamp = int(time.time())
+        for idx, file_data in enumerate(files):
+            file_name = os.path.join("photos", f"image_{timestamp}_{i + 1}_{idx + 1}.png")
+            save_image(file_data, file_name)
+            print(f"Изображение сохранено: {file_name}")
 
 
 if __name__ == '__main__':
