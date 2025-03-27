@@ -61,22 +61,67 @@ def save_image(base64_data, file_path):
     with open(file_path, 'wb') as f:
         f.write(image_data)
 
+def get_user_choice():
+    """Выбор источника промпта"""
+    print("\nВыберите источник промпта:")
+    print("1. Ввести текст вручную")
+    print("2. Загрузить из файла input.txt")
+    while True:
+        choice = input("Ваш выбор (1/2): ").strip()
+        if choice in ['1', '2']:
+            return choice
+        print("Ошибка: введите 1 или 2")
+
+def get_prompt_from_user():
+    """Многострочный ввод от пользователя"""
+    return input("Введите описание изображения: ")
+
+def get_prompt_from_file():
+    """Чтение промпта из файла"""
+    try:
+        with open("input.txt", "r", encoding="utf-8") as f:
+            content = f.read().strip()
+            if not content:
+                raise ValueError("Файл input.txt пуст")
+            return content
+    except FileNotFoundError:
+        print("Ошибка: файл input.txt не найден")
+    except Exception as e:
+        print(f"Ошибка чтения файла: {str(e)}")
+    return None
+
 
 def get_user_input():
+    """Ввод количества изображений"""
     while True:
         try:
-            num = int(input("Сколько изображений сгенерировать? (1-100): "))
-            if 1 <= num <= 100:
+            num = int(input("Сколько изображений сгенерировать? (1-1000): "))
+            if 1 <= num <= 1000:
                 return num
-            print("Число должно быть от 1 до 100!")
+            print("Число должно быть от 1 до 1000!")
         except ValueError:
             print("Введите целое число!")
 
 
 def main():
-    # Чтение описания из input.txt
-    with open("input.txt", "r", encoding="utf-8") as file:
-        prompt = file.read().strip()
+    # Выбор источника промпта
+    choice = get_user_choice()
+
+    if choice == '1':
+        prompt = get_prompt_from_user()
+        # Предложить сохранить в файл
+        if prompt and input("Сохранить промпт в файл? (y/N): ").lower() == 'y':
+            with open("input.txt", "w", encoding="utf-8") as f:
+                f.write(prompt)
+    else:
+        prompt = get_prompt_from_file()
+        if not prompt:
+            print("Будет использован ручной ввод")
+            prompt = get_prompt_from_user()
+
+    if not prompt:
+        print("Промпт не может быть пустым!")
+        return
 
     # Создание папки photos, если она не существует
     os.makedirs("photos", exist_ok=True)
