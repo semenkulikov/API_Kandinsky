@@ -80,10 +80,11 @@ def get_prompt_from_file():
     """Чтение промпта из файла"""
     try:
         with open("input.txt", "r", encoding="utf-8") as f:
-            content = f.read().strip()
-            if not content:
+            prompts = f.readlines()
+            prompts = [i.strip("\n") for i in prompts]
+            if not prompts:
                 raise ValueError("Файл input.txt пуст")
-            return content
+            return prompts
     except FileNotFoundError:
         print("Ошибка: файл input.txt не найден")
     except Exception as e:
@@ -95,7 +96,7 @@ def get_user_input():
     """Ввод количества изображений"""
     while True:
         try:
-            num = int(input("Сколько изображений сгенерировать? (1-1000): "))
+            num = int(input("Сколько изображений сгенерировать для каждого промта? (1-1000): "))
             if 1 <= num <= 1000:
                 return num
             print("Число должно быть от 1 до 1000!")
@@ -105,23 +106,26 @@ def get_user_input():
 
 def main():
     # Выбор источника промпта
-    choice = get_user_choice()
+    # choice = get_user_choice()
 
-    if choice == '1':
-        prompt = get_prompt_from_user()
-        # Предложить сохранить в файл
-        if prompt and input("Сохранить промпт в файл? (y/N): ").lower() == 'y':
-            with open("input.txt", "w", encoding="utf-8") as f:
-                f.write(prompt)
-    else:
-        prompt = get_prompt_from_file()
-        if not prompt:
-            print("Будет использован ручной ввод")
-            prompt = get_prompt_from_user()
+    # if choice == '1':
+    #     prompt = get_prompt_from_user()
+    #     # Предложить сохранить в файл
+    #     if prompt and input("Сохранить промпт в файл? (y/N): ").lower() == 'y':
+    #         with open("input.txt", "w", encoding="utf-8") as f:
+    #             f.write(prompt)
+    # else:
+    #     prompt = get_prompt_from_file()
+    #     if not prompt:
+    #         print("Будет использован ручной ввод")
+    #         prompt = get_prompt_from_user()
+    #
+    # if not prompt:
+    #     print("Промпт не может быть пустым!")
+    #     return
 
-    if not prompt:
-        print("Промпт не может быть пустым!")
-        return
+    print("Получение промтов из файла...")
+    prompts = get_prompt_from_file()
 
     # Создание папки photos, если она не существует
     os.makedirs("photos", exist_ok=True)
@@ -133,20 +137,22 @@ def main():
 
     num_images = get_user_input()  # Получаем количество через интерактивный ввод
 
-    for i in range(num_images):
-        print(f"\nГенерация изображения {i + 1}/{num_images}")
-        uuid = api.generate(prompt, pipeline_id)
-        print("UUID запроса:", uuid)
+    for index, prompt in enumerate(prompts):
+        print(f"\nОбработка промта {index + 1}/{len(prompts)}")
+        for i in range(num_images):
+            print(f"\n\tГенерация изображения {i + 1}/{num_images}")
+            uuid = api.generate(prompt, pipeline_id)
+            print("\tUUID запроса:", uuid)
 
-        # Проверка статуса и получение сгенерированного изображения
-        print("Ожидание генерации изображения...")
-        files = api.check_generation(uuid)
+            # Проверка статуса и получение сгенерированного изображения
+            print("\tОжидание генерации изображения...")
+            files = api.check_generation(uuid)
 
-        timestamp = int(time.time())
-        for idx, file_data in enumerate(files):
-            file_name = os.path.join("photos", f"image_{timestamp}_{i + 1}_{idx + 1}.png")
-            save_image(file_data, file_name)
-            print(f"Изображение сохранено: {file_name}")
+            timestamp = int(time.time())
+            for file_data in files:
+                file_name = os.path.join("photos", f"image_{timestamp}_{index + 1}_{i + 1}.png")
+                save_image(file_data, file_name)
+                print(f"\tИзображение сохранено: {file_name}")
 
 
 if __name__ == '__main__':
