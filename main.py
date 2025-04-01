@@ -105,24 +105,6 @@ def get_user_input():
 
 
 def main():
-    # Выбор источника промпта
-    # choice = get_user_choice()
-
-    # if choice == '1':
-    #     prompt = get_prompt_from_user()
-    #     # Предложить сохранить в файл
-    #     if prompt and input("Сохранить промпт в файл? (y/N): ").lower() == 'y':
-    #         with open("input.txt", "w", encoding="utf-8") as f:
-    #             f.write(prompt)
-    # else:
-    #     prompt = get_prompt_from_file()
-    #     if not prompt:
-    #         print("Будет использован ручной ввод")
-    #         prompt = get_prompt_from_user()
-    #
-    # if not prompt:
-    #     print("Промпт не может быть пустым!")
-    #     return
 
     print("Получение промтов из файла...")
     prompts = get_prompt_from_file()
