@@ -57,6 +57,12 @@ class FusionBrainAPI:
 
 
 def save_image(base64_data, file_path):
+    """
+    Функция для сохранения изображения
+    :param base64_data: бинарные данные файла
+    :param file_path: путь, куда надо сохранить
+    :return:
+    """
     image_data = base64.b64decode(base64_data)
     with open(file_path, 'wb') as f:
         f.write(image_data)
