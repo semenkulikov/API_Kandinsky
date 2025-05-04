@@ -15,6 +15,7 @@ class FusionBrainAPI:
         }
 
     def get_pipeline(self):
+        """ Метод для выбора модели ИИ """
         response = requests.get(self.URL + 'key/api/v1/pipelines', headers=self.AUTH_HEADERS)
         data = response.json()
         # Выбираем первую модель (на данный момент только Kandinsky доступен)
